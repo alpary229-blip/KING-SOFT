@@ -23,6 +23,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
       - name: Prepare Project & Install Capacitor
         run: |
           npm init -y
@@ -36,7 +40,7 @@ jobs:
 
       - name: Initialize & Sync Capacitor Android
         run: |
-          npx cap init "منظومة المبرمج أحمد الشريف المحاسبي الذكي برو" "com.ahmedalsharif.accounting" --web-dir=dist
+          npx cap init "AlSharifSmartPro" "com.ahmedalsharif.accounting" --web-dir=dist
           npx cap add android
           npx cap sync android
 
@@ -44,7 +48,7 @@ jobs:
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload Ready APK Artifact (ahmed-alsharif-smart-pro.apk)
         uses: actions/upload-artifact@v4
