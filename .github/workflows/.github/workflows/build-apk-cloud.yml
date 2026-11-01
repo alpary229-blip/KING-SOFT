@@ -1,0 +1,56 @@
+name: Build Ahmed Al-Sharif Smart Pro Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java JDK 17 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Prepare Project & Install Capacitor
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          mkdir -p dist
+          if [ -f "index.html" ]; then
+            cp index.html dist/index.html
+          else
+            curl -sL "https://ais-pre-lzvohbwt4ol6zuozku4tgn-958364671179.europe-west2.run.app" -o dist/index.html
+          fi
+
+      - name: Initialize & Sync Capacitor Android
+        run: |
+          npx cap init "منظومة المبرمج أحمد الشريف المحاسبي الذكي برو" "com.ahmedalsharif.accounting" --web-dir=dist
+          npx cap add android
+          npx cap sync android
+
+      - name: Assemble Ready Android APK
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Ready APK Artifact (ahmed-alsharif-smart-pro.apk)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ahmed-alsharif-smart-pro-apk
+          path: android/app/build/outputs/apk/debug/*.apk
